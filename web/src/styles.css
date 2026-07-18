@@ -38,7 +38,15 @@ body {
 
 .cabinet {
   width: min(460px, 100%);
-  background: linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 100%);
+  background:
+    repeating-linear-gradient(
+      93deg,
+      rgba(0, 0, 0, 0.14) 0 2px,
+      transparent 2px 9px,
+      rgba(255, 200, 140, 0.04) 9px 11px,
+      transparent 11px 16px
+    ),
+    linear-gradient(180deg, #5c341e 0%, var(--wood) 40%, var(--wood-dark) 100%);
   border: 3px solid #16406b;
   border-radius: 200px 200px 18px 18px;
   padding: 44px 28px 28px;
@@ -188,13 +196,21 @@ body {
 .control-deck {
   width: 100%;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
   background: var(--panel);
   border: 1px solid #2c211a;
   border-radius: 14px;
-  padding: 18px 16px 14px;
+  padding: 20px 16px 16px;
+}
+
+.knob-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 16px;
 }
 
 .knob-block {
@@ -210,12 +226,16 @@ body {
 
 .knob {
   border-radius: 50%;
+  /* Layered top-to-bottom: specular highlight, dark face disc, knurled grip
+     ring (only visible where the face disc fades to transparent at the edge). */
   background:
-    radial-gradient(circle at 32% 28%, var(--chrome-hi) 0%, #b9b9c4 34%, var(--chrome-lo) 72%, #3c3c46 100%);
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.16) 0%, transparent 52%),
+    radial-gradient(closest-side, #36363e 0%, #2a2a31 55%, #131318 84%, transparent 85%),
+    repeating-conic-gradient(#3b3b44 0deg 5deg, #14141a 5deg 10deg);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.6),
-    inset 0 -3px 8px rgba(0, 0, 0, 0.35),
-    inset 0 3px 6px rgba(255, 255, 255, 0.35);
+    0 5px 14px rgba(0, 0, 0, 0.65),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.6),
+    inset 0 3px 6px rgba(255, 255, 255, 0.12);
   cursor: grab;
   touch-action: none;
   position: relative;
@@ -237,14 +257,14 @@ body {
 
 .knob-indicator {
   position: absolute;
-  top: 7%;
+  top: 15%;
   left: 50%;
-  width: 8%;
-  height: 26%;
+  width: 7%;
+  height: 22%;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: #16406b;
-  box-shadow: 0 0 5px rgba(55, 226, 255, 0.7);
+  background: #f4e3b2;
+  box-shadow: 0 0 6px var(--amber-glow);
 }
 
 .knob-label {
@@ -297,10 +317,3 @@ body {
   filter: brightness(1.08);
 }
 
-@media (max-width: 430px) {
-  .control-deck {
-    flex-direction: column;
-    align-items: center;
-    gap: 22px;
-  }
-}

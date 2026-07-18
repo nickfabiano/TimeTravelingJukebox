@@ -1,15 +1,16 @@
 export interface NowPlayingProps {
   track: Spotify.PlaybackTrack | null;
+  emptyHint: string;
 }
 
 // Track/artist names come from the Spotify API and are untrusted data.
 // They are only ever rendered as React text nodes (auto-escaped) — never
 // via dangerouslySetInnerHTML.
-export function NowPlaying({ track }: NowPlayingProps) {
+export function NowPlaying({ track, emptyHint }: NowPlayingProps) {
   if (!track) {
     return (
       <div className="now-playing now-playing-empty">
-        <div className="now-playing-hint">Turn the year knob to start the music</div>
+        <div className="now-playing-hint">{emptyHint}</div>
       </div>
     );
   }

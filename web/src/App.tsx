@@ -139,7 +139,16 @@ export default function App() {
             ))}
         </div>
 
-        <NowPlaying track={phase === 'on' ? track : null} />
+        <NowPlaying
+          track={phase === 'on' ? track : null}
+          emptyHint={
+            phase === 'signed-out' || phase === 'boot'
+              ? 'Connect Spotify to begin'
+              : phase === 'on'
+                ? 'Turn the year knob to start the music'
+                : 'Press Power On to warm up'
+          }
+        />
 
         {error && (
           <div className="error-strip" role="alert">
@@ -167,18 +176,31 @@ export default function App() {
         )}
 
         <div className="control-deck">
-          <Knob
-            label={`Year (${MIN_YEAR}–${MAX_YEAR})`}
-            value={year}
-            min={MIN_YEAR}
-            max={MAX_YEAR}
-            degreesPerUnit={16}
-            size={140}
-            display={String(year)}
-            onChange={setYear}
-            onCommit={handleYearCommit}
-            disabled={phase !== 'on'}
-          />
+          <div className="knob-row">
+            <Knob
+              label={`Year (${MIN_YEAR}–${MAX_YEAR})`}
+              value={year}
+              min={MIN_YEAR}
+              max={MAX_YEAR}
+              degreesPerUnit={16}
+              size={124}
+              display={String(year)}
+              onChange={setYear}
+              onCommit={handleYearCommit}
+              disabled={phase !== 'on'}
+            />
+            <Knob
+              label="Volume"
+              value={volume}
+              min={0}
+              max={100}
+              degreesPerUnit={2.7}
+              size={92}
+              display={`${volume}%`}
+              onChange={handleVolumeChange}
+              disabled={phase !== 'on'}
+            />
+          </div>
           <TransportControls
             paused={playback?.paused ?? true}
             shuffleOn={shuffleOn}
@@ -187,17 +209,6 @@ export default function App() {
             onNext={() => void playerRef.current?.player.nextTrack()}
             onPrevious={() => void playerRef.current?.player.previousTrack()}
             onToggleShuffle={handleToggleShuffle}
-          />
-          <Knob
-            label="Volume"
-            value={volume}
-            min={0}
-            max={100}
-            degreesPerUnit={2.7}
-            size={100}
-            display={`${volume}%`}
-            onChange={handleVolumeChange}
-            disabled={phase !== 'on'}
           />
         </div>
 
