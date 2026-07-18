@@ -1,5 +1,16 @@
 import { getAccessToken, forceRefresh } from './auth';
 
+export class SpotifyApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly endpoint: string,
+    public readonly apiMessage: string,
+  ) {
+    super(`Spotify ${status} on ${endpoint}${apiMessage ? `: ${apiMessage}` : ''}`);
+    this.name = 'SpotifyApiError';
+  }
+}
+
 async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   let token = await getAccessToken();
   if (!token) throw new Error('Not signed in to Spotify.');
@@ -18,9 +29,27 @@ async function apiFetch(path: string, init: RequestInit = {}): Promise<Response>
   }
   if (res.status === 429) throw new Error('Spotify rate limit hit — slow down a moment.');
   if (!res.ok && res.status !== 204) {
-    throw new Error(`Spotify API error (${res.status})`);
+    // Spotify error bodies look like {"error": {"status": 404, "message": "..."}}
+    let apiMessage = '';
+    try {
+      const body = await res.json();
+      apiMessage = body?.error?.message ?? '';
+    } catch {
+      /* non-JSON body */
+    }
+    const endpoint = path.split('?')[0];
+    throw new SpotifyApiError(res.status, endpoint, apiMessage);
   }
   return res;
+}
+
+/** True when the error means our SDK player device is gone/stale. */
+export function isDeviceNotFound(e: unknown): boolean {
+  return (
+    e instanceof SpotifyApiError &&
+    e.status === 404 &&
+    e.endpoint.startsWith('/me/player')
+  );
 }
 
 export async function playPlaylist(

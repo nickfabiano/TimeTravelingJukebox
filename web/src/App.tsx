@@ -8,7 +8,7 @@ import {
   getAccessToken,
 } from './spotify/auth';
 import { createPlayer, PlayerHandle } from './spotify/player';
-import { getPlaylistLength, playPlaylist, setShuffle } from './spotify/api';
+import { getPlaylistLength, isDeviceNotFound, playPlaylist, setShuffle } from './spotify/api';
 import { Knob } from './components/Knob';
 import { TransportControls } from './components/TransportControls';
 import { NowPlaying } from './components/NowPlaying';
@@ -105,6 +105,17 @@ export default function App() {
       if (shuffleRef.current) await setShuffle(true, handle.deviceId);
       setActiveYear(selectedYear);
     } catch (e) {
+      if (isDeviceNotFound(e)) {
+        // The SDK device dropped off Spotify's side (tab slept, network blip).
+        // Power-cycle so the user gets a clean restart instead of a dead knob.
+        handle.player.disconnect();
+        playerRef.current = null;
+        setPlayback(null);
+        setActiveYear(null);
+        setPhase('off');
+        setError('The jukebox lost its connection to Spotify — press Power On to reconnect.');
+        return;
+      }
       setError(e instanceof Error ? e.message : 'Could not start playback.');
     }
   };
