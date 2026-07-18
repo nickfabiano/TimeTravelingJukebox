@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { knobTick } from '../audio/sounds';
 
 export interface KnobProps {
   label: string;
@@ -36,6 +37,7 @@ export function Knob({
   const knobRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ lastAngle: number; fraction: number } | null>(null);
   const idleCommit = useRef<number | null>(null);
+  const [settling, setSettling] = useState(false);
   const valueRef = useRef(value);
   valueRef.current = value;
 
@@ -54,15 +56,24 @@ export function Knob({
 
   const applyDelta = (units: number) => {
     const next = clamp(valueRef.current + units, min, max);
-    if (next !== valueRef.current) onChange(next);
+    if (next !== valueRef.current) {
+      knobTick();
+      onChange(next);
+    }
     return next;
+  };
+
+  const commit = () => {
+    onCommit?.(valueRef.current);
+    setSettling(true);
+    window.setTimeout(() => setSettling(false), 500);
   };
 
   const scheduleIdleCommit = () => {
     if (idleCommit.current !== null) window.clearTimeout(idleCommit.current);
     idleCommit.current = window.setTimeout(() => {
       idleCommit.current = null;
-      onCommit?.(valueRef.current);
+      commit();
     }, 400);
   };
 
@@ -91,7 +102,7 @@ export function Knob({
   const handlePointerUp = () => {
     if (!drag.current) return;
     drag.current = null;
-    onCommit?.(valueRef.current);
+    commit();
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -121,7 +132,7 @@ export function Knob({
     <div className={`knob-block${disabled ? ' knob-disabled' : ''}`}>
       <div
         ref={knobRef}
-        className="knob"
+        className={`knob${settling ? ' knob-settling' : ''}`}
         style={{ width: size, height: size }}
         role="slider"
         aria-label={label}
