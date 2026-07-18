@@ -8,7 +8,7 @@ import {
   getAccessToken,
 } from './spotify/auth';
 import { createPlayer, PlayerHandle } from './spotify/player';
-import { playPlaylist, setShuffle } from './spotify/api';
+import { getPlaylistLength, playPlaylist, setShuffle } from './spotify/api';
 import { Knob } from './components/Knob';
 import { TransportControls } from './components/TransportControls';
 import { NowPlaying } from './components/NowPlaying';
@@ -29,7 +29,7 @@ export default function App() {
   const [year, setYear] = useState(DEFAULT_YEAR);
   const [activeYear, setActiveYear] = useState<number | null>(null);
   const [volume, setVolume] = useState(60);
-  const [shuffleOn, setShuffleOn] = useState(false);
+  const [shuffleOn, setShuffleOn] = useState(true);
   const [playback, setPlayback] = useState<Spotify.PlaybackState | null>(null);
   const playerRef = useRef<PlayerHandle | null>(null);
   const shuffleRef = useRef(false);
@@ -87,13 +87,20 @@ export default function App() {
     if (!playlistId) return;
     setError(null);
     try {
+      // With shuffle on, drop the needle on a random track — Spotify would
+      // otherwise always start a context at track 1 even in shuffle mode.
+      let offset: number | undefined;
+      if (shuffleRef.current) {
+        const total = await getPlaylistLength(playlistId).catch(() => 0);
+        if (total > 1) offset = Math.floor(Math.random() * total);
+      }
       try {
-        await playPlaylist(playlistId, handle.deviceId);
+        await playPlaylist(playlistId, handle.deviceId, offset);
       } catch {
         // The device occasionally isn't registered yet right after power-on;
         // one short retry covers it.
         await new Promise((r) => setTimeout(r, 700));
-        await playPlaylist(playlistId, handle.deviceId);
+        await playPlaylist(playlistId, handle.deviceId, offset);
       }
       if (shuffleRef.current) await setShuffle(true, handle.deviceId);
       setActiveYear(selectedYear);
@@ -127,6 +134,12 @@ export default function App() {
   return (
     <div className="stage">
       <div className="cabinet">
+        <div className="cabinet-star" aria-hidden="true">
+          &#x2605;
+        </div>
+        <div className="foot foot-left" aria-hidden="true" />
+        <div className="foot foot-right" aria-hidden="true" />
+        <div className="grille" aria-hidden="true" />
         <h1 className="marquee">Time Traveling Jukebox</h1>
 
         <div className="year-display" aria-live="polite">
