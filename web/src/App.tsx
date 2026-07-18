@@ -51,6 +51,10 @@ export default function App() {
   }, []);
 
   const powerOn = async () => {
+    // Discard any half-alive player from a previous power-on so repeated
+    // presses can never stack ghost devices.
+    playerRef.current?.player.disconnect();
+    playerRef.current = null;
     setPhase('starting');
     setError(null);
     try {
