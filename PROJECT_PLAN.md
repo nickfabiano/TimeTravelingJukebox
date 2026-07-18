@@ -93,6 +93,35 @@ Spotify does not allow arbitrary full-song streaming via a plain REST call — f
 - **Whose account:** V1 assumes the user logs in with their own Premium account. Fine for personal use; a public deployment would need Spotify extended-quota approval.
 - **Free-tier fallback (optional):** 30-second preview clips via the Web API could serve non-Premium visitors, but previews are inconsistently available and this is explicitly out of scope for the first pass.
 
+### Security requirements
+
+These are requirements, not suggestions — the implementation should follow all of them.
+
+**Auth & tokens (the main attack surface):**
+
+- **Authorization Code with PKCE only.** Never the implicit grant (deprecated, leaks tokens in URLs) and never the client-credentials or plain authorization-code flow in the browser — there must be **no client secret anywhere in this project**. PKCE is designed so a public client needs none; the Spotify Client ID is public by design and safe to commit.
+- Include and verify the **`state` parameter** in the OAuth flow (CSRF protection); generate the PKCE `code_verifier` with `crypto.getRandomValues`, never `Math.random`.
+- **Keep the access token in memory only** (a JS variable/closure), never in `localStorage`. If the refresh token is persisted for convenience across reloads, that's an explicit tradeoff against XSS — acceptable for a personal app, but it makes the XSS mitigations below load-bearing. Clearing tokens on logout must actually clear storage.
+- Strip the authorization `code` from the URL (`history.replaceState`) immediately after the redirect callback is handled, so it never lands in browser history or referrer headers.
+
+**XSS hardening (what protects those tokens):**
+
+- Track names, artist names, and album metadata come from the Spotify API and must be treated as **untrusted data**: rendered as text, never via `innerHTML`/`dangerouslySetInnerHTML`. (React's default escaping covers this — the rule is "don't opt out of it.")
+- Ship a strict **Content-Security-Policy**: `default-src 'self'`, with narrow allowances only for Spotify's SDK script origin (`sdk.scdn.co`), API (`api.spotify.com`, `accounts.spotify.com`), and album-art image CDN. No wildcard sources, no `unsafe-inline` scripts.
+- **No third-party scripts** beyond the Spotify SDK — no analytics, no CDN-loaded libraries. Every foreign script is a token-theft vector in an app that holds tokens client-side.
+- HTTPS only (static hosts do this by default); register the **exact** production redirect URI in the Spotify dashboard — no localhost redirect URIs left registered on the production app.
+
+**Supply chain & repo hygiene:**
+
+- Minimal dependency footprint; commit the lockfile; enable Dependabot (or `npm audit` in CI) on the repo.
+- Nothing sensitive in the repo, ever: no tokens, no `.env` with secrets (there are none in V1, which is the point — keep it that way). Add a `.gitignore` from day one.
+
+**V2 (Pi) security, for later:**
+
+- The Pi will hold a **persisted refresh token** — store it in a file readable only by the service user (`chmod 600`, dedicated non-root user), outside the git working tree.
+- Standard Pi hardening: change default credentials, SSH keys only, no ports exposed beyond the LAN, unattended security updates. librespot should only be discoverable on the local network.
+- Consider a dedicated Spotify account for the device so a stolen/compromised jukebox doesn't expose your personal account.
+
 ---
 
 ## Data: Year → Playlist Mapping
