@@ -230,27 +230,26 @@ export default function App() {
   const controlsDisabled = phase !== 'on' || activeYear === null;
 
   return (
-    <div className="stage">
-      <div className="jukebox">
-        <div className="cabinet-star" aria-hidden="true">
-          &#x2605;
+    <div className="app">
+      <div className="tube-frame" aria-hidden="true">
+        <div className="tube-edge tube-edge-top" />
+        <div className="tube-edge tube-edge-bottom" />
+        <div className="tube-edge tube-edge-left">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <span key={i} className="bubble" />
+          ))}
         </div>
-        <div className="foot foot-left" aria-hidden="true" />
-        <div className="foot foot-right" aria-hidden="true" />
-        <div className="frame-red">
-          <div className="frame-cream-outer">
-            <div className="tube">
-              <div className="bubbles" aria-hidden="true">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <span key={i} className="bubble" />
-                ))}
-              </div>
-              <div className="frame-cream-inner">
-                <div
-                  className={`cabinet${justLit ? ' just-lit' : ''}`}
-                  data-phase={phase}
-                  style={{ ['--accent' as string]: decadeAccent(year) }}
-                >
+        <div className="tube-edge tube-edge-right">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <span key={i} className="bubble" />
+          ))}
+        </div>
+      </div>
+      <main
+        className={`panel${justLit ? ' just-lit' : ''}`}
+        data-phase={phase}
+        style={{ ['--accent' as string]: decadeAccent(year) }}
+      >
                   <div className="grille" aria-hidden="true" />
                   <h1 className="marquee">Time Traveling Jukebox</h1>
 
@@ -362,12 +361,7 @@ export default function App() {
                       Log out
                     </button>
                   )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
