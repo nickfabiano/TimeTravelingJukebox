@@ -20,6 +20,7 @@
   --wood-dark: #572a0f;
   --ink: #3a2513;
   --tube-w: 12px;
+  --digit-size: 2.8rem;
 }
 
 html,
@@ -211,9 +212,9 @@ body {
 .year-reel {
   display: inline-block;
   overflow: hidden;
-  height: 2.8rem;
+  height: var(--digit-size);
   font-family: 'Courier New', monospace;
-  font-size: 2.8rem;
+  font-size: var(--digit-size);
   font-weight: 700;
 }
 
@@ -224,8 +225,8 @@ body {
 }
 
 .year-reel-digit {
-  height: 2.8rem;
-  line-height: 2.8rem;
+  height: var(--digit-size);
+  line-height: var(--digit-size);
   min-width: 1ch;
   text-align: center;
   color: var(--accent, var(--amber));
@@ -600,6 +601,105 @@ body {
 
 .transport-btn:not(:disabled):active {
   transform: translateY(1px) scale(0.94);
+}
+
+/* ---- Desktop scale-up: fill the room instead of floating in it ---- */
+
+@media (min-width: 900px) {
+  :root {
+    --digit-size: 4rem;
+  }
+
+  .panel {
+    width: min(820px, 100%);
+    gap: 22px;
+  }
+
+  .grille {
+    width: 240px;
+    height: 120px;
+  }
+
+  .marquee {
+    font-size: 2rem;
+  }
+
+  .year-display {
+    padding: 12px 26px;
+    border-width: 4px;
+  }
+
+  .now-playing {
+    min-height: 140px;
+    padding: 24px 28px 20px;
+    gap: 20px;
+    border-radius: 90px 90px 14px 14px;
+  }
+
+  .now-playing-hint {
+    font-size: 1.05rem;
+  }
+
+  .vinyl {
+    width: 92px;
+    height: 92px;
+  }
+
+  .vinyl-label {
+    width: 40px;
+    height: 40px;
+  }
+
+  .now-playing-track {
+    font-size: 1.25rem;
+  }
+
+  .now-playing-artist {
+    font-size: 1rem;
+  }
+
+  .progress-track {
+    height: 5px;
+    margin-top: 10px;
+  }
+
+  .big-btn {
+    font-size: 1.05rem;
+    padding: 16px 42px;
+  }
+
+  .control-deck {
+    padding: 26px 24px 22px;
+    gap: 24px;
+  }
+
+  .knob-label {
+    font-size: 0.8rem;
+  }
+
+  .transport {
+    gap: 16px;
+  }
+
+  .transport-btn {
+    width: 58px;
+    height: 58px;
+  }
+
+  .transport-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .transport-btn-play {
+    width: 74px;
+    height: 74px;
+  }
+
+  .transport-btn-play svg {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 /* ---- Accessibility ---- */

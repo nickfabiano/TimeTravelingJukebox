@@ -49,6 +49,20 @@ function decadeAccent(year: number): string {
   }
 }
 
+/** True when the viewport is desktop-sized; tracks resizes. */
+function useIsWide(): boolean {
+  const [isWide, setIsWide] = useState(
+    () => window.matchMedia('(min-width: 900px)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 900px)');
+    const onChange = (e: MediaQueryListEvent) => setIsWide(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return isWide;
+}
+
 export default function App() {
   const [phase, setPhase] = useState<Phase>('boot');
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +76,7 @@ export default function App() {
   const playerRef = useRef<PlayerHandle | null>(null);
   const shuffleRef = useRef(true);
   shuffleRef.current = shuffleOn;
+  const isWide = useIsWide();
 
   useEffect(() => {
     // ?demo renders the powered-on UI with a fake track — no Spotify calls.
@@ -307,7 +322,7 @@ export default function App() {
                         min={MIN_YEAR}
                         max={MAX_YEAR}
                         degreesPerUnit={16}
-                        size={124}
+                        size={isWide ? 180 : 124}
                         display={String(year)}
                         onChange={setYear}
                         onCommit={handleYearCommit}
@@ -319,7 +334,7 @@ export default function App() {
                         min={0}
                         max={100}
                         degreesPerUnit={2.7}
-                        size={92}
+                        size={isWide ? 132 : 92}
                         display={`${volume}%`}
                         onChange={handleVolumeChange}
                         disabled={phase !== 'on'}
