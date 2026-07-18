@@ -48,7 +48,11 @@ export function isDeviceNotFound(e: unknown): boolean {
   return (
     e instanceof SpotifyApiError &&
     e.status === 404 &&
-    e.endpoint.startsWith('/me/player')
+    e.endpoint.startsWith('/me/player') &&
+    // Spotify says "Device not found" for a stale device. Other 404s on the
+    // player endpoint (e.g. a context/playlist the app cannot access) must
+    // NOT be treated as recoverable-by-reconnect.
+    e.apiMessage.toLowerCase().includes('device')
   );
 }
 
