@@ -5,12 +5,15 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://sdk.scdn.co; frame-src https://sdk.scdn.co https://*.spotify.com; connect-src 'self' https://api.spotify.com https://accounts.spotify.com https://*.spotify.com wss://*.spotify.com https://*.scdn.co; img-src 'self' data: https://*.scdn.co https://*.spotifycdn.com; media-src 'self' blob: https://*.spotify.com https://*.scdn.co https://*.spotifycdn.com; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://sdk.scdn.co; frame-src https://sdk.scdn.co https://*.spotify.com; connect-src 'self' blob: https://api.spotify.com https://accounts.spotify.com https://*.spotify.com wss://*.spotify.com https://*.scdn.co https://*.spotifycdn.com; img-src 'self' data: blob: https://*.scdn.co https://*.spotifycdn.com; media-src 'self' blob: data: https://*.spotify.com https://*.scdn.co https://*.spotifycdn.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; child-src 'self' blob: https://sdk.scdn.co; base-uri 'self'; form-action 'self'"
         },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "no-referrer" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), encrypted-media=(self \"https://sdk.scdn.co\")"
+        }
       ]
     }
   ]
