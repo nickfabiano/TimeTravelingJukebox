@@ -108,6 +108,12 @@ These are requirements, not suggestions — the implementation should follow all
 
 - Track names, artist names, and album metadata come from the Spotify API and must be treated as **untrusted data**: rendered as text, never via `innerHTML`/`dangerouslySetInnerHTML`. (React's default escaping covers this — the rule is "don't opt out of it.")
 - Ship a strict **Content-Security-Policy**: `default-src 'self'`, with narrow allowances only for Spotify's SDK script origin (`sdk.scdn.co`), API (`api.spotify.com`, `accounts.spotify.com`), and album-art image CDN. No wildcard sources, no `unsafe-inline` scripts.
+- **Playback needs specific grants, learned the hard way** (these broke production while local dev worked, because headers only apply on the deployed site):
+  - `Permissions-Policy` must delegate `encrypted-media` to `sdk.scdn.co`. Spotify streams are Widevine-protected and the SDK decrypts inside a cross-origin iframe; the browser default grants that capability to `self` only, so the iframe is denied and every track fails with a bare "Playback error".
+  - `script-src` needs `'wasm-unsafe-eval'` — any page carrying a CSP blocks WebAssembly without it, and the SDK uses WASM.
+  - `connect-src`/`media-src` need `spotifycdn.com` plus `blob:` for audio segments.
+  - Symptom to recognise: `playback_error` rather than `authentication_error` means auth and device registration succeeded and the failure is in the audio/DRM layer — look at headers, not tokens.
+- Keep a `securitypolicyviolation` listener that logs blocked directives. Without it, a too-strict policy presents as a vague failure with nothing useful in the console.
 - **No third-party scripts** beyond the Spotify SDK — no analytics, no CDN-loaded libraries. Every foreign script is a token-theft vector in an app that holds tokens client-side.
 - HTTPS only (static hosts do this by default); register the **exact** production redirect URI in the Spotify dashboard — no localhost redirect URIs left registered on the production app.
 
