@@ -39,10 +39,24 @@ export async function createPlayer(cb: PlayerCallbacks): Promise<PlayerHandle> {
   });
 
   player.addListener('player_state_changed', cb.onStateChange);
-  player.addListener('initialization_error', (e) => cb.onPlaybackError(e.message));
-  player.addListener('authentication_error', (e) => cb.onAuthError(e.message));
-  player.addListener('account_error', (e) => cb.onAccountError(e.message));
-  player.addListener('playback_error', (e) => cb.onPlaybackError(e.message));
+  // The SDK's messages are often just "Playback error", so log the whole
+  // event — it carries the detail the UI strip cannot show.
+  player.addListener('initialization_error', (e) => {
+    console.error('[Spotify initialization_error]', e);
+    cb.onPlaybackError(e.message);
+  });
+  player.addListener('authentication_error', (e) => {
+    console.error('[Spotify authentication_error]', e);
+    cb.onAuthError(e.message);
+  });
+  player.addListener('account_error', (e) => {
+    console.error('[Spotify account_error]', e);
+    cb.onAccountError(e.message);
+  });
+  player.addListener('playback_error', (e) => {
+    console.error('[Spotify playback_error]', e);
+    cb.onPlaybackError(e.message);
+  });
 
   const deviceId = await new Promise<string>((resolve, reject) => {
     const timeout = setTimeout(
